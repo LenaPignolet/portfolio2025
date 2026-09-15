@@ -831,8 +831,8 @@ services:
 
 - [ ] **Step 3: Valider la syntaxe du compose file**
 
-Run: `docker compose config`
-Expected: affiche la configuration résolue sans erreur (le `.env` local du dev, avec les vraies clés Notion, doit exister au même endroit — c'est déjà le cas, cf. `.gitignore`).
+Run: `docker compose config --no-interpolate`
+Expected: affiche la configuration sans erreur. **Ne pas utiliser `docker compose config` sans `--no-interpolate`** ici : la commande résout et affiche en clair les variables du `.env` local — donc les vraies clés Notion — dans la sortie (constaté en exécutant ce step : la vraie `VITE_NOTION_API_KEY` s'est retrouvée affichée). `--no-interpolate` valide la syntaxe sans résoudre les valeurs.
 
 - [ ] **Step 4: Commit**
 
