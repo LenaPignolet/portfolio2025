@@ -592,6 +592,8 @@ git commit -m "Add Notion webhook HMAC signature verification"
 npm install @astrojs/node@latest
 ```
 
+> Vérifié à l'exécution : `@astrojs/node@latest` (v11) exige `astro@^7.2.1`, incompatible avec `astro@^5.17.1` de ce projet. Utiliser plutôt la dernière version dont le peer dependency est satisfait par la version d'Astro installée (`npm view @astrojs/node@<version> peerDependencies` pour vérifier) — au moment de l'écriture, `@astrojs/node@9.5.3` (peer `astro@^5.14.3`).
+
 - [ ] **Step 2: Mettre à jour `astro.config.mjs`**
 
 Contenu actuel :
@@ -750,11 +752,16 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=4321
 
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
 COPY --from=build /app/dist ./dist
 
 EXPOSE 4321
 CMD ["node", "./dist/server/entry.mjs"]
 ```
+
+> `npm ci --omit=dev` dans l'étage runtime est nécessaire : le renderer Vue d'Astro importe `vue` au runtime pour le SSR, pas seulement au build. Sans `node_modules` dans l'image finale, le conteneur crash au démarrage avec `ERR_MODULE_NOT_FOUND: Cannot find package 'vue'` (constaté en vérifiant l'étape suivante).
 
 - [ ] **Step 3: Construire l'image et vérifier qu'elle démarre**
 
