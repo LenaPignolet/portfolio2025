@@ -5,8 +5,11 @@ import { projectImages } from '../pages/api/projectImages.js';
 const NOTION_VERSION = '2022-06-28';
 
 export async function fetchNotionProjects() {
-    const apiKey = import.meta.env.VITE_NOTION_API_KEY;
-    const databaseId = import.meta.env.VITE_NOTION_DATABASE_ID;
+    // process.env (not import.meta.env) — ces valeurs doivent être lues au runtime
+    // du conteneur, pas figées au build (le build Docker tourne sans les vraies
+    // variables, .env est exclu via .dockerignore).
+    const apiKey = process.env.VITE_NOTION_API_KEY;
+    const databaseId = process.env.VITE_NOTION_DATABASE_ID;
     const url = `https://api.notion.com/v1/databases/${databaseId}/query`;
 
     logger.loading('API Notion', "Appel à l'API Notion...");

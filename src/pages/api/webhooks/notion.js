@@ -33,7 +33,8 @@ export async function POST({ request }) {
         return new Response('OK', { status: 200 });
     }
 
-    const secret = import.meta.env.NOTION_WEBHOOK_SECRET;
+    // process.env, pas import.meta.env : doit être lu au runtime du conteneur (cf. fetchNotionProjects.js)
+    const secret = process.env.NOTION_WEBHOOK_SECRET;
     const signatureHeader = request.headers.get('X-Notion-Signature');
 
     if (!verifyNotionSignature(rawBody, signatureHeader, secret)) {
