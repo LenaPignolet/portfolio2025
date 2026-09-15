@@ -31,7 +31,7 @@ describe('verifyNotionSignature', () => {
 
     it('rejects a tampered body', () => {
         const signature = computeNotionSignature(BODY, SECRET);
-        const tamperedBody = BODY.replace('secret_t', 'secret_x');
+        const tamperedBody = `${BODY} `;
 
         expect(verifyNotionSignature(tamperedBody, signature, SECRET)).toBe(false);
     });
