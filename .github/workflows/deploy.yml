@@ -53,7 +53,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_SSH_PORT }}
           script: |
-            cd ~/portfolio
+            cd /var/www/portfolio2026
             docker compose pull
             docker compose up -d
             docker image prune -f

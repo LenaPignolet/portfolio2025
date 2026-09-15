@@ -15,7 +15,7 @@ Prérequis : le site est déployé et accessible en HTTPS (cf. `vps-setup.md`), 
 Notion envoie immédiatement une requête POST unique (non signée) à l'URL du webhook, avec `{"verification_token": "..."}`. Ce token doit apparaître dans les logs du conteneur :
 
     ssh <user>@<vps-host>
-    cd ~/portfolio
+    cd /var/www/portfolio2026
     docker compose logs -f portfolio
 
 Chercher la ligne loguée par `src/pages/api/webhooks/notion.js` (`verification_token reçu — à recopier dans Notion`).
@@ -31,7 +31,7 @@ Chercher la ligne loguée par `src/pages/api/webhooks/notion.js` (`verification_
 ## 4. Configurer le secret côté serveur
 
     ssh <user>@<vps-host>
-    cd ~/portfolio
+    cd /var/www/portfolio2026
     nano .env
     # NOTION_WEBHOOK_SECRET=<le verification_token récupéré à l'étape 2>
     docker compose up -d

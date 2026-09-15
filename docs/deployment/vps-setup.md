@@ -16,24 +16,38 @@ Depuis une machine de confiance (pas nécessairement le VPS) :
 
     ssh-keygen -t ed25519 -C "github-actions-deploy" -f ./deploy_key -N ""
 
-- Ajouter le contenu de `deploy_key.pub` dans `~/.ssh/authorized_keys` sur le VPS.
-- Ajouter le contenu de `deploy_key` (la clé privée) comme secret GitHub Actions `VPS_SSH_KEY` (cf. workflow `.github/workflows/deploy.yml`).
-- Supprimer les fichiers `deploy_key` / `deploy_key.pub` de la machine locale une fois copiés.
+Copier la clé publique sur le VPS avec `ssh-copy-id` (plus fiable qu'un `cat >> ~/.ssh/authorized_keys` manuel — il crée `~/.ssh` avec les bonnes permissions si besoin) :
+
+    ssh-copy-id -i deploy_key.pub <user>@<vps-host>
+
+Vérifier que la connexion fonctionne avec cette clé précise avant d'aller plus loin :
+
+    ssh -i deploy_key <user>@<vps-host> "echo connexion OK"
+
+**Ordre important — ne pas supprimer les fichiers avant d'avoir fait les deux étapes suivantes dans cet ordre :**
+
+1. Ajouter le contenu de `deploy_key` (la clé privée) comme secret GitHub Actions `VPS_SSH_KEY` : `gh secret set VPS_SSH_KEY < deploy_key`
+2. Vérifier que le secret est bien créé : `gh secret list`
+3. Seulement après confirmation, supprimer `deploy_key` / `deploy_key.pub` de la machine locale.
 
 ## 3. Créer le répertoire de déploiement
 
-    mkdir -p ~/portfolio
-    cd ~/portfolio
+Ce projet réutilise le répertoire existant de l'ancien déploiement FileZilla :
+
+    mkdir -p /var/www/portfolio2026
+    cd /var/www/portfolio2026
+
+(Les anciens fichiers statiques qui s'y trouvent peuvent être supprimés une fois le nouveau setup Docker validé.)
 
 ## 4. Copier `docker-compose.yml` sur le VPS
 
 Depuis la machine locale, à la racine du repo :
 
-    scp docker-compose.yml <user>@<vps-host>:~/portfolio/docker-compose.yml
+    scp docker-compose.yml <user>@<vps-host>:/var/www/portfolio2026/docker-compose.yml
 
 ## 5. Créer le fichier `.env` sur le VPS
 
-    cd ~/portfolio
+    cd /var/www/portfolio2026
     nano .env
 
 Renseigner (voir `.env.example` dans le repo pour la liste à jour) :
@@ -52,7 +66,7 @@ Si le package GHCR est privé, le VPS doit s'authentifier pour pouvoir `pull` l'
 
 ## 7. Premier déploiement manuel (avant le premier run du workflow CD)
 
-    cd ~/portfolio
+    cd /var/www/portfolio2026
     docker compose pull
     docker compose up -d
 
