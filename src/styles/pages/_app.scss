@@ -2,9 +2,6 @@
     @include flex();
     justify-content: center;
     padding-bottom: 74px;
-    background-image: url('https://images.unsplash.com/photo-1633259584604-afdc243122ea?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
-    background-size: cover;
-    background-repeat: no-repeat;
 
     &__content {
         flex: 1;
@@ -37,6 +34,71 @@
         &__title {
             text-transform: uppercase;
             font-size: 18px;
+        }
+    }
+}
+
+// Tablet
+// _____________________________
+
+@media screen and (min-width: $screen-lg) {
+    body {
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .app {
+        display: grid;
+        grid-template-columns: 80px 1fr;
+        gap: 16px;
+        align-items: start;
+        padding: 24px;
+        padding-bottom: 24px;
+        height: 100dvh;
+        width: 100%;
+        max-width: $screen-xxl;
+        overflow: hidden;
+
+        &__sidebar {
+            position: relative;
+            height: 100%;
+        }
+
+        &__content {
+            height: 100%;
+            margin: 0;
+            max-width: none;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+    }
+}
+
+// Desktop
+// _____________________________
+
+@media screen and (min-width: $screen-xl) {
+    .app {
+        height: min(100dvh, 900px);
+        margin: auto;
+
+        &-content {
+            min-height: 0;
+        }
+
+        &__sidebar {
+            height: 100%;
+        }
+
+        .page {
+            min-height: 0;
+            gap: 0;
+        }
+
+        .section {
+            &__title-container {
+                margin-bottom: 24px;
+            }
         }
     }
 }
