@@ -10,6 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@astrojs/node": "^9.5.3",
     "@astrojs/vue": "^5.1.4",
     "@lucide/astro": "^0.562.0",
     "@notionhq/client": "^5.6.0",
