@@ -1,5 +1,7 @@
 ---
-import AppLayout from '../layouts/AppLayout.astro'
+import Layout from '../layouts/Layout.astro';
+import PortfolioApp from '../layouts/PortfolioApp.vue';
 ---
-
-<AppLayout />
+<Layout>
+  <PortfolioApp client:load />
+</Layout>
