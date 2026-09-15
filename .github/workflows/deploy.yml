@@ -29,17 +29,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Compute lowercase image name
+        id: image_name
+        run: echo "name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
-            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
+            ghcr.io/${{ steps.image_name.outputs.name }}:latest
+            ghcr.io/${{ steps.image_name.outputs.name }}:${{ github.sha }}
 
       - id: image
-        run: echo "image=ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+        run: echo "image=ghcr.io/${{ steps.image_name.outputs.name }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
 
   deploy:
     needs: build-and-push
