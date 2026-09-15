@@ -1,8 +1,10 @@
+// src/utils/notion.js
+import { logger } from './logger.js';
+
 const CACHE_KEY = 'portfolio_projects';
 const CACHE_DURATION = 1000 * 60 * 60 * 24; // 24 heures
 
 let fetchPromise = null;
-let imagesPreloaded = false;
 
 function isCacheValid(cache) {
     if (!cache || !cache.timestamp || !cache.data) return false;
@@ -12,17 +14,22 @@ function isCacheValid(cache) {
 function getFromCache() {
     try {
         const cached = localStorage.getItem(CACHE_KEY);
-        if (!cached) return null;
+        if (!cached) {
+            logger.debug('Cache', 'Pas de cache trouvé');
+            return null;
+        }
 
         const parsed = JSON.parse(cached);
         if (isCacheValid(parsed)) {
+            logger.cache('Cache', 'Cache valide trouvé', `${parsed.data?.length ?? 0} projets`);
             return parsed.data;
         }
 
-        console.log('Cache expiré');
+        logger.warning('Cache', 'Cache expiré, suppression');
+        localStorage.removeItem(CACHE_KEY);
         return null;
     } catch (e) {
-        console.warn('Cache corrompu, suppression...');
+        logger.error('Cache', 'Cache corrompu', e.message);
         localStorage.removeItem(CACHE_KEY);
         return null;
     }
@@ -37,83 +44,55 @@ function saveToCache(projects) {
                 data: projects,
             }),
         );
-        console.log('Projets sauvegardés dans le cache');
+        logger.success('Cache', 'Données sauvegardées en cache', `${projects?.length ?? 0} projets`);
     } catch (e) {
-        console.error('Erreur lors de la sauvegarde du cache:', e);
+        logger.error('Cache', 'Erreur lors de la sauvegarde du cache', e.message);
     }
 }
 
 async function fetchFromAPI() {
+    logger.loading('API', 'Appel à /api/projects');
     const response = await fetch('/api/projects');
 
     if (!response.ok) {
         const error = await response.json();
+        logger.error('API', 'Réponse erreur', error.error);
         throw new Error(error.error || 'Erreur lors de la récupération');
     }
 
-    const projects = await response.json();
-
-    return projects;
-}
-
-function preloadImages(projects) {
-    if (imagesPreloaded) {
-        console.log('Images déjà préchargées');
-        return;
+    const data = await response.json();
+    
+    // Récupère les logs du serveur
+    if (data.logs) {
+        logger.info('API', 'Logs serveur reçus', `${data.logs.length} entrées`);
+        data.logs.forEach(log => {
+            logger.log(log.type, log.module, log.message, log.data);
+        });
     }
-
-    const allImages = projects.flatMap((project) => project.images || []);
-
-    if (allImages.length === 0) {
-        imagesPreloaded = true;
-        return;
-    }
-
-    let loadedCount = 0;
-
-    allImages.forEach((imageUrl, index) => {
-        const img = new Image();
-
-        img.onload = () => {
-            loadedCount++;
-            if (loadedCount === allImages.length) {
-                imagesPreloaded = true;
-            }
-        };
-
-        img.onerror = () => {
-            loadedCount++;
-            console.warn(`Erreur de chargement pour l'image ${index + 1}`);
-            if (loadedCount === allImages.length) {
-                imagesPreloaded = true;
-            }
-        };
-
-        img.src = imageUrl;
-    });
+    
+    logger.success('API', 'Données reçues', `${data.projects?.length ?? 0} projets`);
+    return data.projects; // Les projets incluent déjà `localImages`
 }
 
 export async function getProjects() {
     const cachedProjects = getFromCache();
     if (cachedProjects) {
-        if (!imagesPreloaded) {
-            preloadImages(cachedProjects);
-        }
         return cachedProjects;
     }
 
     if (fetchPromise) {
+        logger.debug('API', 'Requête déjà en cours, attente...');
         return fetchPromise;
     }
 
     fetchPromise = fetchFromAPI()
         .then((projects) => {
             saveToCache(projects);
-            preloadImages(projects);
             fetchPromise = null;
             return projects;
         })
         .catch((error) => {
+            logger.error('getProjects', 'Erreur', error.message);
             fetchPromise = null;
             throw error;
         });
@@ -122,21 +101,17 @@ export async function getProjects() {
 }
 
 export async function preloadProjects() {
-    const cachedProjects = getFromCache();
-    if (cachedProjects) {
-        if (!imagesPreloaded) {
-            preloadImages(cachedProjects);
-        }
-        return;
+    try {
+        logger.loading('preloadProjects', 'Préchargement des projets...');
+        await getProjects();
+        logger.success('preloadProjects', 'Préchargement terminé');
+    } catch (err) {
+        logger.error('preloadProjects', 'Erreur de préchargement', err.message);
     }
-
-    getProjects().catch((err) => {
-        console.error('Erreur lors du préchargement:', err);
-    });
 }
 
 export function clearProjectsCache() {
+    logger.warning('Cache', 'Effacement du cache');
     localStorage.removeItem(CACHE_KEY);
     fetchPromise = null;
-    imagesPreloaded = false;
 }
