@@ -27,9 +27,9 @@ export async function POST({ request }) {
     // manuellement dans l'interface Notion, puis stocké dans NOTION_WEBHOOK_SECRET
     // sur le serveur (cf. Task 15).
     if (payload.verification_token) {
-        logger.info('webhook', 'verification_token reçu — à recopier dans Notion', {
-            verification_token: payload.verification_token,
-        });
+        // console.log direct (pas logger.info) : logger.enabled vaut false par défaut,
+        // ce qui masquerait ce message critique dans `docker compose logs`.
+        console.log(`[webhook] verification_token reçu — à recopier dans Notion : ${payload.verification_token}`);
         return new Response('OK', { status: 200 });
     }
 
