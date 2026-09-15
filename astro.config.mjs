@@ -5,8 +5,10 @@ import svgr from "vite-plugin-svgr";
 
 // https://astro.build/config
 export default defineConfig({
+  output: 'static',
+  base: '/',
   vite: {
-    plugins: [svgr()],
+    plugins: [svgr()]
   },
   integrations: [vue()]
 });
