@@ -29,7 +29,11 @@ export async function POST({ request }) {
     if (payload.verification_token) {
         // console.log direct (pas logger.info) : logger.enabled vaut false par défaut,
         // ce qui masquerait ce message critique dans `docker compose logs`.
-        console.log(`[webhook] verification_token reçu — à recopier dans Notion : ${payload.verification_token}`);
+        // Token tronqué : il devient le secret HMAC (NOTION_WEBHOOK_SECRET), on évite
+        // de le faire persister en clair dans les logs.
+        const token = payload.verification_token;
+        const masked = `${token.slice(0, 4)}${'*'.repeat(Math.max(token.length - 4, 0))}`;
+        console.log(`[webhook] verification_token reçu (masqué) : ${masked} — valeur complète disponible dans le payload brut si besoin de la recopier manuellement dans Notion.`);
         return new Response('OK', { status: 200 });
     }
 
