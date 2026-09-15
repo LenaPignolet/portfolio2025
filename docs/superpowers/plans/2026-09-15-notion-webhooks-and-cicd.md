@@ -15,7 +15,7 @@
 - Le déclenchement du déploiement en production reste **manuel** (`workflow_dispatch`), jamais automatique sur push `main`.
 - Les secrets applicatifs (clé Notion, secret webhook) vivent dans un `.env` **sur le VPS**, jamais dans les secrets GitHub Actions ni dans les logs CI.
 - Toute nouvelle logique métier pure (parsing, cache, signature, debounce) doit être testée avec Vitest — pas de test pour la config/infra pure (Dockerfile, workflows YAML), qui se vérifie par exécution manuelle.
-- Ce plan part de la branche `feature/notion-webhooks`, déjà rebasée sur `feature/notion-project-images` (qui ajoute `src/utils/logger.js` et `src/pages/api/projectImages.js`, référencés ci-dessous). Si `feature/notion-project-images` ou `feature/app-desktop` sont mergées entre-temps, un rebase/résolution de conflit triviale peut être nécessaire avant de continuer (les tâches ci-dessous ne dépendent pas des fichiers spécifiques à `feature/app-desktop`).
+- Ce plan part de la branche `feature/notion-webhooks`, rebasée sur `develop` après le merge de `feature/notion-project-images`, `feature/app-desktop` et `fix/home-page` (2026-09-15). `develop` contient donc déjà `src/utils/logger.js`, `src/pages/api/projectImages.js`, `src/layouts/PortfolioApp.vue`, et `astro.config.mjs` avec `output: 'static'` — les tâches ci-dessous sont écrites contre cet état réel.
 
 ---
 
@@ -604,8 +604,10 @@ import svgr from "vite-plugin-svgr";
 
 // https://astro.build/config
 export default defineConfig({
+  output: 'static',
+  base: '/',
   vite: {
-    plugins: [svgr()],
+    plugins: [svgr()]
   },
   integrations: [vue()]
 });
@@ -624,8 +626,9 @@ import node from "@astrojs/node";
 export default defineConfig({
   output: 'server',
   adapter: node({ mode: 'standalone' }),
+  base: '/',
   vite: {
-    plugins: [svgr()],
+    plugins: [svgr()]
   },
   integrations: [vue()]
 });
@@ -663,13 +666,13 @@ Frontmatter actuel :
 
 ```astro
 ---
-import AppLayout from '../layouts/AppLayout.astro'
+import Layout from '../layouts/Layout.astro';
+import PortfolioApp from '../layouts/PortfolioApp.vue';
 ---
-
-<AppLayout />
+<Layout>
+  <PortfolioApp client:load />
+</Layout>
 ```
-
-> Si `feature/app-desktop` a été mergée entre-temps, cette page importera `PortfolioApp.vue` au lieu de `AppLayout.astro` — la modification reste la même : ajouter `export const prerender = true;` en première ligne du frontmatter, peu importe les imports qui suivent.
 
 Remplacer par :
 
@@ -677,10 +680,12 @@ Remplacer par :
 ---
 export const prerender = true;
 
-import AppLayout from '../layouts/AppLayout.astro'
+import Layout from '../layouts/Layout.astro';
+import PortfolioApp from '../layouts/PortfolioApp.vue';
 ---
-
-<AppLayout />
+<Layout>
+  <PortfolioApp client:load />
+</Layout>
 ```
 
 - [ ] **Step 5: Vérifier que le build fonctionne**
@@ -1341,7 +1346,7 @@ git commit -m "Add Notion webhook endpoint with signature verification and debou
 
 - [ ] **Step 1: Remplacer le contenu de `src/utils/notion.js`**
 
-Nouveau contenu complet — le cache serveur (Task 3 + Task 9) rend le cache localStorage 24h contre-productif, il est supprimé. `clearProjectsCache` est conservée (no-op côté client) pour ne pas casser les appelants existants (importée par `src/pages/Projects.vue` sur cette branche, et effectivement appelée dans `onMounted` de `PortfolioApp.vue` si `feature/app-desktop` a été mergée entre-temps) :
+Nouveau contenu complet — le cache serveur (Task 3 + Task 9) rend le cache localStorage 24h contre-productif, il est supprimé. `clearProjectsCache` est conservée (no-op côté client) pour ne pas casser les appelants existants (appelée dans `onMounted` de `src/layouts/PortfolioApp.vue`, et importée — mais non utilisée — par `src/components/Projects.vue`) :
 
 ```js
 // src/utils/notion.js
