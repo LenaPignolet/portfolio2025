@@ -16,16 +16,13 @@ import Icon from '../components/Icon.vue'
 		<div class="section intro">
 			<h2 class="intro__subtitle">Hello ! 👋</h2>
 			<p class="intro__text">
-				Développeuse front-end passionnée par le <span>design</span> et l’<span>expérience utilisateur</span> ,
-				je crée des interfaces à la
-				fois <span>esthétiques</span> et <span>fonctionnelles</span>.
+				<span>Développeuse front-end junior</span> avec un <span>œil créatif</span>, j'aime concevoir des interfaces qui allient <span>design</span> et <span>accessibilité</span>.
 			</p>
 			<p class="intro__text">
-				J’accorde une grande importance aux détails et à la <span>cohérence visuelle</span> de chaque projet.
+				Toujours en apprentissage, j'explore continuellement de <span>nouvelles compétences</span> et technologies pour progresser dans mon métier.
 			</p>
 			<p class="intro__text">
-				<span>Curieuse</span> et <span>créative</span>, j’aime apprendre en continu pour faire évoluer mes
-				compétences.
+				Je prends plaisir à soigner les détails pour offrir aux utilisateurs une expérience <span>fluide</span> et <span>agréable</span>.
 			</p>
 		</div>
 
@@ -51,8 +48,9 @@ import Icon from '../components/Icon.vue'
 						<p class="timeline__date">2025 - présent</p>
 						<p class="timeline__place">Agence Dn'D, Paris - Alternance</p>
 						<p class="timeline__description">
-							Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ac tortor non nulla blandit
-							blandit.
+							Développement et intégration d’interfaces web pour des
+							projets e-commerce, principalement sous Magento 2, au sein
+							d’une agence digitale.
 						</p>
 					</div>
 				</div>
@@ -71,13 +69,12 @@ import Icon from '../components/Icon.vue'
 						<p class="timeline__date">2022 - 2024</p>
 						<p class="timeline__place">BPCE Financement, Reims - Intérim</p>
 						<p class="timeline__description">
-							Appels entrants et sortants, négociation client, et blablabla, hihi
+							Gestion de dossiers de recouvrement amiable et négociation de solutions adaptées.
 						</p>
 					</div>
 				</div>
 			</div>
 		</div>
-
 
 		<div class="section education">
 			<div class="section__title-container">

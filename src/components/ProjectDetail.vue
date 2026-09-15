@@ -1,74 +1,94 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import { getProjects } from '../utils/notion.js';
-import Icon from '../components/Icon.vue';
-import { ArrowLeft, ExternalLink, ZoomIn } from 'lucide-vue-next';
-import VueEasyLightbox from 'vue-easy-lightbox';
+    import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+    import { getProjects } from '../utils/notion.js';
+    import { logger } from '../utils/logger.js';
+    import Icon from '../components/Icon.vue';
+    import { ArrowLeft, ExternalLink, ZoomIn } from 'lucide-vue-next';
+    import VueEasyLightbox from 'vue-easy-lightbox';
 
-const props = defineProps({
-    projectId: {
-        type: String,
-        required: true,
-    },
-});
-
-const emit = defineEmits(['back']);
-
-const project = ref(null);
-const loading = ref(true);
-const error = ref(null);
-const lightboxVisible = ref(false);
-const lightboxIndex = ref(0);
-
-function formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-        year: 'numeric',
-        month: 'long',
+    const props = defineProps({
+        projectId: {
+            type: String,
+            required: true,
+        },
     });
-}
 
-function handleBack(event) {
-    event.preventDefault();
-    emit('back');
-}
+    const emit = defineEmits(['back']);
 
-function openLightbox(index = 0) {
-    lightboxIndex.value = index;
-    lightboxVisible.value = true;
-}
+    const project = ref(null);
+    const loading = ref(true);
+    const error = ref(null);
+    const lightboxVisible = ref(false);
+    const lightboxIndex = ref(0);
+    const lightboxImgs = computed(() => (project.value?.images ?? []).filter(Boolean));
 
-function closeLightbox() {
-    lightboxVisible.value = false;
-}
-
-async function loadProject() {
-    loading.value = true;
-    error.value = null;
-
-    try {
-        const projects = await getProjects();
-        project.value = projects.find((p) => p.id === props.projectId);
-
-        if (!project.value) {
-            error.value = 'Projet introuvable.';
-        }
-    } catch (err) {
-        console.error('Erreur:', err);
-        error.value = err.message;
-    } finally {
-        loading.value = false;
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR', {
+            year: 'numeric',
+            month: 'long',
+        });
     }
-}
 
-onMounted(() => {
-    loadProject();
-});
+    function handleBack(event) {
+        event.preventDefault();
+        emit('back');
+    }
 
-watch(() => props.projectId, () => {
-    loadProject();
-});
+    function openLightbox(index = 0) {
+        logger.debug('ProjectDetail.vue', 'Ouverture lightbox', {
+            'Index': index,
+            'Nombre images': project.value?.images?.length ?? 0,
+            'Images': project.value?.images ?? []
+        });
+        lightboxIndex.value = index;
+        lightboxVisible.value = true;
+    }
+
+    function closeLightbox() {
+        logger.debug('ProjectDetail.vue', 'Fermeture lightbox');
+        lightboxVisible.value = false;
+    }
+
+    async function loadProject() {
+        loading.value = true;
+        error.value = null;
+
+        try {
+            logger.loading('ProjectDetail.vue', 'Chargement du projet', props.projectId);
+            const projects = await getProjects();
+            logger.data('ProjectDetail.vue', 'Nombre de projets reçus', projects.length);
+            
+            project.value = projects.find((p) => p.id === props.projectId);
+
+            if (!project.value) {
+                logger.error('ProjectDetail.vue', 'Projet non trouvé', props.projectId);
+                error.value = 'Projet introuvable.';
+            } else {
+                logger.success('ProjectDetail.vue', 'Projet trouvé', {
+                    id: project.value.id,
+                    title: project.value.title,
+                    'Nombre d\'images': project.value.images?.length ?? 0,
+                    'Images': project.value.images ?? [],
+                });
+            }
+        } catch (err) {
+            logger.error('ProjectDetail.vue', 'Erreur de chargement', err.message);
+            error.value = err.message;
+        } finally {
+            loading.value = false;
+        }
+    }
+
+    onMounted(() => {
+        loadProject();
+        logger.debug('ProjectDetail.vue', 'Images count on mount', project.value?.images?.length ?? 0);
+    });
+
+    watch(() => props.projectId, () => {
+        loadProject();
+    });
 </script>
 
 <template>
@@ -134,7 +154,7 @@ watch(() => props.projectId, () => {
                 </div>
             </section>
 
-            <section v-if="project.description" class="project-description">
+            <section v-if="project.description" class="project-description project-context">
                 <div class="project-title__wrapper">
                     <Icon name="sparkle" class="icon" aria-hidden="true" />
                     <h3>Contexte</h3>
@@ -143,7 +163,7 @@ watch(() => props.projectId, () => {
                 <p>{{ project.context }}</p>
             </section>
 
-            <section v-if="project.description" class="project-description">
+            <section v-if="project.description" class="project-description project-works">
                 <div class="project-title__wrapper">
                     <Icon name="sparkle" class="icon" aria-hidden="true" />
                     <h3>Réalisation</h3>
@@ -157,30 +177,38 @@ watch(() => props.projectId, () => {
                     <button 
                         class="project-images__zoom-btn"
                         @click="openLightbox(0)"
+                        type="button"
                         aria-label="Agrandir l'image"
                     >
                         <ZoomIn class="icon" aria-hidden="true" />
                     </button>
                     
-                    <img 
-                        :src="project.images[0]" 
+                    <img
+                        v-if="project.images?.length"
+                        :src="project.images[0]"
                         :alt="`${project.title} - Aperçu`"
                         class="project-images__main"
                         @click="openLightbox(0)"
+                        style="cursor: pointer;"
+                        @load="() => logger.debug('ProjectDetail.vue', 'Image chargée', project.images[0])"
                     />
-                    
+
                     <div v-if="project.images.length > 1" class="project-images__count">
                         <span>{{ project.images.length }} photos</span>
                     </div>
                 </div>
-            </section>
 
-            <VueEasyLightbox
-                :visible="lightboxVisible"
-                :imgs="project?.images || []"
-                :index="lightboxIndex"
-                @hide="closeLightbox"
-            />
+                <div style="display:none;" aria-hidden="true">
+                    <img v-for="(img, i) in lightboxImgs" :key="i" :src="img" :alt="`preload ${i}`" />
+                </div>
+
+                <VueEasyLightbox
+                    :visible="lightboxVisible"
+                    :imgs="lightboxImgs"
+                    :index="lightboxIndex"
+                    @hide="closeLightbox"
+                />
+            </section>
         </div>
     </div>
 </template>

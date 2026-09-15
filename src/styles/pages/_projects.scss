@@ -13,7 +13,7 @@
         }
 
         &__subtitle {
-            font-weight: 300;
+            font-weight: $font-weight__light;
         }
 
         .icon {
@@ -23,6 +23,10 @@
         &::before {
             @include decorative-circle($right: -60px, $bottom: -60px);
         }
+    }
+
+    .section__title-container {
+        display: none;
     }
 
     .filters {
@@ -43,7 +47,7 @@
         border: 1px solid $color-black;
         background: transparent;
         font-size: 12px;
-        font-weight: 500;
+        font-weight: $font-weight__medium;
         cursor: pointer;
         transition: all 0.3s ease;
         color: $color-black;
@@ -84,6 +88,13 @@
         overflow: hidden;
         border: 1px solid $color-white;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+
+        &:hover {
+            .project-card__cta svg {
+                transform: rotate(45deg);
+            }
+        }
 
         &__image-wrapper {
             position: relative;
@@ -119,10 +130,6 @@
                 width: 16px;
                 transition: transform 0.2s ease;
             }
-
-            &:hover svg {
-                transform: rotate(45deg);
-            }
         }
 
         &__skills {
@@ -134,7 +141,7 @@
                 background: linear-gradient(135deg, rgba(19, 2, 255, 0.1) 0%, rgba(128, 0, 255, 0.1) 100%);
                 color: $color-blue;
                 font-size: 12px;
-                font-weight: 600;
+                font-weight: $font-weight__semibold;
                 border-radius: 50px;
                 text-transform: uppercase;
             }
@@ -142,13 +149,13 @@
 
         &__title {
             font-size: 20px;
-            font-weight: 700;
+            font-weight: $font-weight__bold;
             line-height: 1.3;
         }
 
         &__date {
             font-size: 14px;
-            font-weight: 300;
+            font-weight: $font-weight__light;
             color: $color-grey;
         }
 
@@ -188,6 +195,123 @@
         .project-card {
             &__image-wrapper {
                 height: 240px;
+            }
+        }
+    }
+}
+
+// Desktop
+// ______________________________
+
+@media (min-width: $screen-xl) {
+    .app {
+        .page {
+            &.projects {
+                display: grid;
+                grid-template-columns: 1.2fr 0.5fr 1.2fr;
+                grid-template-rows: auto auto 1fr;
+                gap: 16px;
+                width: 100%;
+                height: 100%;
+                min-height: 0;
+                overflow: hidden;
+
+                .header {
+                    grid-column: 1 / 2;
+                    grid-row: 1 / 2;
+                }
+
+                .section__title-container {
+                    display: flex;
+                    margin-block-end: 0;
+                }
+
+                .filters {
+                    grid-column: 2 / 4;
+                    grid-row: 1 / 2;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    align-items: center;
+
+                    &__list {
+                        max-width: 100%;
+                        justify-content: flex-start;
+                        align-items: center;
+                        gap: 24px;
+                        max-width: none;
+                        margin: 0;
+                    }
+                }
+
+                .loading {
+                    grid-column: 1 / 4;
+                    grid-row: 2 / 4;
+                }
+
+                .projects-container {
+                    grid-column: 1 / 4;
+                    grid-row: 2 / 4;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                    min-height: 0;
+                    max-height: 100%;
+                }
+
+                .projects-grid {
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 20px;
+                }
+
+                .project-card {
+                    background: white;
+                    border: 1px solid $color-black;
+                    border-radius: 16px;
+                    transition: all 0.3s ease;
+
+                    &__image-wrapper {
+                        height: 200px;
+                    }
+
+                    &__content {
+                        background: white;
+                    }
+
+                    &__cta {
+                        background: $color-white;
+                        box-shadow: 0 2px 8px rgba(0, 23, 151, 0.1);
+
+                        svg {
+                            color: $color-dark-blue;
+                        }
+                    }
+
+                    &__skills {
+                        span {
+                            background: linear-gradient(135deg, rgba(19, 2, 255, 0.05) 0%, rgba(128, 0, 255, 0.05) 100%);
+                            border: 1px solid rgba(19, 2, 255, 0.1);
+                            color: $color-dark-blue;
+                            
+                            &:hover {
+                                background: linear-gradient(135deg, rgba(19, 2, 255, 0.1) 0%, rgba(128, 0, 255, 0.1) 100%);
+                                border-color: rgba(19, 2, 255, 0.2);
+                            }
+                        }
+                    }
+
+                    &__title {
+                        color: #1f2937;
+                    }
+
+                    &__date {
+                        color: $color-grey;
+                    }
+
+                    &:hover {
+                        border-color: rgba(19, 2, 255, 0.3);
+                        box-shadow: 0 8px 24px rgba(19, 2, 255, 0.12);
+                    }
+                }
             }
         }
     }

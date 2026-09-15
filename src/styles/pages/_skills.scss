@@ -5,7 +5,6 @@
 
         &__title--wrapper {
             @include flex(row, flex-start, center, nowrap, 8px);
-            margin-bottom: 16px;
 
             .icon {
                 width: 16px;
@@ -17,8 +16,6 @@
         }
 
         &__subtitle {
-            font-size: 18px;
-            color: $color-grey;
             max-width: 600px;
         }
 
@@ -76,7 +73,7 @@
 
         &__name {
             font-size: 14px;
-            font-weight: 500;
+            font-weight: $font-weight__medium;
             text-align: center;
             color: #1f2937;
         }
@@ -97,10 +94,10 @@
         border: 1px solid rgba(19, 2, 255, 0.1);
         border-radius: 12px;
         font-size: 14px;
-        font-weight: 500;
+        font-weight: $font-weight__medium;
         text-align: center;
         transition: all 0.3s ease;
-        
+
         &:hover {
             background: linear-gradient(135deg, rgba(19, 2, 255, 0.1) 0%, rgba(128, 0, 255, 0.1) 100%);
             border-color: rgba(19, 2, 255, 0.2);
@@ -137,11 +134,7 @@
     .skills {
         .header {
             &__title {
-                font-size: 42px;
-            }
-
-            &__subtitle {
-                font-size: 20px;
+                font-size: 34px;
             }
         }
 
@@ -160,6 +153,113 @@
 
             &__name {
                 font-size: 16px;
+            }
+        }
+    }
+}
+
+// Tablet
+// ______________________________
+
+@media (min-width: $screen-xl) {
+    .app {
+        .page {
+            &.skills {
+                display: grid;
+                grid-template-columns: 1.2fr 0.85fr 0.85fr;
+                grid-template-rows: auto repeat(8, minmax(0, 1fr));
+                gap: 16px;
+                height: 100%;
+
+                .skill-header {
+                    grid-column: 1 / 2;
+                    grid-row: 1;
+
+                    &::before {
+                        @include decorative-circle($left: -60px, $bottom: -60px);
+                    }
+                }
+
+                .skill-card--technical,
+                .skill-category {
+                    overflow-y: auto;
+                    min-height: 0;
+                }
+
+                .skill-category--frontend {
+                    grid-column: 1;
+                    grid-row: 2 / 7;
+
+                    &::before {
+                        @include decorative-circle($top: -60px, $left: -60px);
+                    }
+                }
+
+                .skill-category--outils-et-workflow {
+                    grid-column: 2;
+                    grid-row: 1 / 5;
+                }
+
+                .skill-category--soft-skills {
+                    grid-column: 2;
+                    grid-row: 5 / 10;
+
+                    &::after {
+                        content: none;
+                    }
+
+                    &::before {
+                        @include decorative-circle($bottom: -60px, $left: -60px);
+                    }
+                }
+
+                .skill-category--e-commerce {
+                    grid-column: 1;
+                    grid-row: 7 / 10;
+                }
+
+                .skill-category--backend {
+                    grid-column: 3;
+                    grid-row: 5 / 10;
+
+                    &::before {
+                        @include decorative-circle($top: -60px, $right: -60px);
+                    }
+                }
+
+                .skill-category--design {
+                    grid-column: 3;
+                    grid-row: 1 / 5;
+
+                    &::before {
+                        @include decorative-circle($top: -60px, $left: -60px);
+                    }
+
+                    &::after {
+                        @include decorative-circle($bottom: -60px, $right: -60px);
+                    }
+                }
+
+                .skills-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                    grid-auto-rows: 1fr;
+                    gap: 8px;
+                    align-items: stretch;
+                }
+
+                .skill-card {
+                    padding: 22px 16px;
+
+                    &__logo {
+                        width: 28px;
+                        height: 28px;
+                    }
+
+                    &__name {
+                        font-size: 14px;
+                    }
+                }
             }
         }
     }
