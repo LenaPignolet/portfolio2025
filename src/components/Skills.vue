@@ -16,6 +16,7 @@ const technicalSkills = [
             { name: 'HTML', logo: '/images/logos/html5.svg' },
             { name: 'CSS / SCSS', logo: '/images/logos/css.svg' },
             { name: 'JavaScript', logo: '/images/logos/javascript.svg' },
+            { name: 'Alpine.js', logo: '/images/logos/alpinejs.svg' },
             { name: 'Vue.js', logo: '/images/logos/vuejs.svg' },
             { name: 'React', logo: '/images/logos/react.svg' },
             { name: 'Tailwind CSS', logo: '/images/logos/tailwindcss.svg' },
@@ -35,6 +36,7 @@ const technicalSkills = [
     {
         title: 'E-commerce',
         skills: [
+            { name: 'Shopify', logo: '/images/logos/shopify.svg' },
             { name: 'Magento 2', logo: '/images/logos/magento.svg' },
 			{ name: 'Hyvä', logo: '/images/logos/hyva.svg' }
         ]
