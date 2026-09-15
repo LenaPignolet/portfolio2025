@@ -980,8 +980,14 @@ import { projectImages } from '../pages/api/projectImages.js';
 const NOTION_VERSION = '2022-06-28';
 
 export async function fetchNotionProjects() {
-    const apiKey = import.meta.env.VITE_NOTION_API_KEY;
-    const databaseId = import.meta.env.VITE_NOTION_DATABASE_ID;
+    // process.env (pas import.meta.env) : lu au runtime du conteneur. import.meta.env
+    // est figé au build par Vite ; le build Docker tourne sans les vraies variables
+    // (.env exclu via .dockerignore), donc la valeur serait gravée à `undefined`
+    // quelle que soit l'injection faite par docker-compose au démarrage du conteneur.
+    // Constaté en prod : l'app renvoyait "API token is invalid" malgré un .env
+    // VPS correct, alors qu'un appel manuel avec process.env fonctionnait.
+    const apiKey = process.env.VITE_NOTION_API_KEY;
+    const databaseId = process.env.VITE_NOTION_DATABASE_ID;
     const url = `https://api.notion.com/v1/databases/${databaseId}/query`;
 
     logger.loading('API Notion', "Appel à l'API Notion...");
@@ -1314,7 +1320,8 @@ export async function POST({ request }) {
         return new Response('OK', { status: 200 });
     }
 
-    const secret = import.meta.env.NOTION_WEBHOOK_SECRET;
+    // process.env, pas import.meta.env : voir la note dans fetchNotionProjects.js (Task 8)
+    const secret = process.env.NOTION_WEBHOOK_SECRET;
     const signatureHeader = request.headers.get('X-Notion-Signature');
 
     if (!verifyNotionSignature(rawBody, signatureHeader, secret)) {
