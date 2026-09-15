@@ -98,6 +98,20 @@ const geometry = new THREE.PlaneGeometry(2, 2);
 const fluidPlane = new THREE.Mesh(geometry, fluidMaterial);
 const displayPlane = new THREE.Mesh(geometry, displayMaterial);
 
+fluidMaterial.uniforms.uBrushSize.value = config.brushSize;
+fluidMaterial.uniforms.uBrushStrength.value = config.brushStrength;
+fluidMaterial.uniforms.uFluidDecay.value = config.fluidDecay;
+fluidMaterial.uniforms.uTrailLength.value = config.trailLength;
+fluidMaterial.uniforms.uStopDecay.value = config.stopDecay;
+
+displayMaterial.uniforms.uDistortionAmount.value = config.distortionAmount;
+displayMaterial.uniforms.uColorIntensity.value = config.colorIntensity;
+displayMaterial.uniforms.uSoftness.value = config.softness;
+displayMaterial.uniforms.uColor1.value.set(...hexToRgb(config.color1));
+displayMaterial.uniforms.uColor2.value.set(...hexToRgb(config.color2));
+displayMaterial.uniforms.uColor3.value.set(...hexToRgb(config.color3));
+displayMaterial.uniforms.uColor4.value.set(...hexToRgb(config.color4));
+
 let mouseX = 0,
     mouseY = 0;
 let prevMouseX = 0,
@@ -123,8 +137,14 @@ document.addEventListener('mouseleave', () => {
     fluidMaterial.uniforms.iMouse.value.set(0, 0, 0, 0);
 });
 
+let isVisible = true;
+document.addEventListener('visibilitychange', () => {
+    isVisible = !document.hidden;
+});
+
 function animate() {
     requestAnimationFrame(animate);
+    if (!isVisible) return;
 
     const time = performance.now() * 0.001;
     fluidMaterial.uniforms.iTime.value = time;
@@ -134,20 +154,6 @@ function animate() {
     if (performance.now() - lastMoveTime > 100) {
         fluidMaterial.uniforms.iMouse.value.set(0, 0, 0, 0);
     }
-
-    fluidMaterial.uniforms.uBrushSize.value = config.brushSize;
-    fluidMaterial.uniforms.uBrushStrength.value = config.brushStrength;
-    fluidMaterial.uniforms.uFluidDecay.value = config.fluidDecay;
-    fluidMaterial.uniforms.uTrailLength.value = config.trailLength;
-    fluidMaterial.uniforms.uStopDecay.value = config.stopDecay;
-
-    displayMaterial.uniforms.uDistortionAmount.value = config.distortionAmount;
-    displayMaterial.uniforms.uColorIntensity.value = config.colorIntensity;
-    displayMaterial.uniforms.uSoftness.value = config.softness;
-    displayMaterial.uniforms.uColor1.value.set(...hexToRgb(config.color1));
-    displayMaterial.uniforms.uColor2.value.set(...hexToRgb(config.color2));
-    displayMaterial.uniforms.uColor3.value.set(...hexToRgb(config.color3));
-    displayMaterial.uniforms.uColor4.value.set(...hexToRgb(config.color4));
 
     fluidMaterial.uniforms.iPreviousFrame.value = previousFluidTarget.texture;
     renderer.setRenderTarget(currentFluidTarget);
@@ -169,6 +175,7 @@ window.addEventListener('resize', () => {
     const height = window.innerHeight;
 
     renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     fluidMaterial.uniforms.iResolution.value.set(width, height);
     displayMaterial.uniforms.iResolution.value.set(width, height);
 

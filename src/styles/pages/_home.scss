@@ -71,7 +71,7 @@
     }
 
     &__description {
-        font-weight: 300;
+        font-weight: $font-weight__light;
         letter-spacing: 1.5px;
     }
 
@@ -81,13 +81,9 @@
         right: 0;
         @include flex(row, center);
         padding: 1.5rem;
-        background-color: transparent;
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        background-image: linear-gradient(120deg, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
-        border-radius: 50px;
-        border: solid 1px rgba(255, 255, 255, 0.3);
-        color: white;
+        background-color: $color-white;
+        border-radius: 50%;
+        color: $color-dark-blue;
         box-shadow: rgba(0, 0, 0, 0.25) 0px 25px 50px -12px;
 
         &--icon {
