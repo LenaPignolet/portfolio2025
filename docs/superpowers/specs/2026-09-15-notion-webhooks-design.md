@@ -1,4 +1,4 @@
-# Notion webhooks — design
+# Notion webhooks & CI/CD — design
 
 ## Problème
 
@@ -12,6 +12,10 @@ Par ailleurs, les images de chaque projet sont actuellement résolues via un
 mapping codé en dur (`src/pages/api/projectImages.js`, ID Notion → liste de
 fichiers locaux), qui doit être édité manuellement à chaque changement.
 
+Enfin, la mise en production se fait aujourd'hui manuellement via FileZilla
+(drag & drop des fichiers buildés) — aucune automatisation, aucun historique
+de déploiement, risque d'erreur humaine.
+
 ## Objectifs
 
 - Un changement de projet dans Notion se répercute automatiquement sur le
@@ -22,6 +26,8 @@ fichiers locaux), qui doit être édité manuellement à chaque changement.
 - La liste des fichiers images par projet devient pilotée par une colonne
   Notion plutôt que par un mapping codé en dur, avec un filet de sécurité pour
   ne rien casser pendant la migration.
+- Mettre en production se résume à déclencher un workflow GitHub Actions,
+  sans FileZilla ni action manuelle sur le VPS.
 
 ## Non-objectifs
 
@@ -29,6 +35,8 @@ fichiers locaux), qui doit être édité manuellement à chaque changement.
   écarté pour complexité — cf. échange en amont de ce document).
 - Pas de rebuild complet du site déclenché par le webhook : seule la donnée
   projets est rafraîchie dynamiquement.
+- Pas de déploiement automatique à chaque push sur `main` : le déclenchement
+  reste manuel (choix explicite, cf. section CI/CD).
 
 ## Architecture
 
@@ -95,6 +103,38 @@ Nouvelle route `POST /api/webhooks/notion.js` :
   mises à jour pourtant déjà disponibles côté serveur. Le cache serveur
   répond assez vite pour ne pas nécessiter de cache client.
 
+## CI/CD
+
+Le repo est sur GitHub ; l'utilisatrice a un accès SSH au VPS (en plus de
+FileZilla). Deux workflows GitHub Actions distincts :
+
+**CI** (`.github/workflows/ci.yml`) — déclenché sur chaque push/PR :
+`npm ci && npm run build`. Garde-fou uniquement, aucun impact sur la prod.
+
+**CD** (`.github/workflows/deploy.yml`) — déclenché **manuellement**
+(`workflow_dispatch`, bouton "Run workflow" dans l'onglet Actions, avec choix
+de la branche/du ref à déployer). Étapes :
+
+1. Build de l'image Docker et push vers GitHub Container Registry (GHCR) —
+   pas de service tiers à gérer, déjà lié au compte GitHub, tag sur le SHA du
+   commit + `latest`.
+2. Connexion SSH au VPS (clé de déploiement stockée en secret GitHub Actions)
+   et exécution de `docker compose pull && docker compose up -d`.
+
+**Répartition des secrets** :
+
+- Dans **GitHub Actions secrets** : uniquement ce qui est nécessaire pour se
+  connecter et déclencher le déploiement (host/utilisateur VPS, clé SSH de
+  déploiement).
+- Dans un **`.env` sur le VPS** (jamais transmis par CI) : clé API Notion,
+  ID de base de données, secret de signature webhook. Lu directement par
+  `docker-compose.yml` au démarrage du conteneur. Évite que ces secrets
+  transitent dans les logs GitHub Actions à chaque déploiement.
+
+Le déclenchement manuel (plutôt qu'auto sur push `main`) est un choix
+délibéré : la mise en prod reste une action volontaire et contrôlée, tout en
+supprimant l'étape FileZilla.
+
 ## Risques / points de vigilance
 
 - Nécessite un accès administrateur du workspace Notion pour créer la
@@ -106,3 +146,9 @@ Nouvelle route `POST /api/webhooks/notion.js` :
   (nécessite un process qui tourne en continu, contrairement au static pur
   actuel) — impact sur toute la chaîne de déploiement, pas seulement sur les
   projets.
+- Le VPS doit pouvoir s'authentifier auprès de GHCR pour faire le `docker
+  compose pull` (`docker login ghcr.io`, à faire une fois manuellement lors
+  du déploiement initial) si le package Docker est privé.
+- La clé SSH de déploiement stockée dans les secrets GitHub Actions doit être
+  dédiée (pas la clé personnelle de l'utilisatrice) et restreinte aux
+  actions nécessaires sur le VPS.
