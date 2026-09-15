@@ -1,0 +1,8 @@
+services:
+  portfolio:
+    image: ghcr.io/lenapignolet/portfolio2025:latest
+    restart: unless-stopped
+    ports:
+      - "4321:4321"
+    env_file:
+      - .env
