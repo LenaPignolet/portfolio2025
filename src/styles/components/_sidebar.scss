@@ -28,7 +28,7 @@
 
         &:hover {
             color: $color-black;
-            background-color: $color-dark-blue--trasparent;
+            background-color: $color-dark-blue--transparent;
         }
 
         &--active {
@@ -96,7 +96,7 @@
             }
 
             &:hover {
-                background-color: $color-dark-blue--trasparent;
+                background-color: $color-dark-blue--transparent;
                 color: $color-dark-blue;
             }
         }
